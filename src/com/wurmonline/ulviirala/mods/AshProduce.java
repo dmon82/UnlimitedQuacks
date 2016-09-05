@@ -50,7 +50,7 @@ public class AshProduce implements WurmServerMod, PreInitable, Configurable {
                              "}"+
 
                              "if (!combinedAsh) {"+
-                             "     this.insertItem(com.wurmonline.server.items.ItemFactory.createItem(141, this.getQualityLevel(), null), true);"+
+                             "     this.insertItem(com.wurmonline.server.items.ItemFactory.createItem(141, this.getCurrentQualityLevel(), null), true);"+
                              "}"+
                         "} }");
                     }
