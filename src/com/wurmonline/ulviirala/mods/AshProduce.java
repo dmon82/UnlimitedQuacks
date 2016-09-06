@@ -20,9 +20,11 @@ import org.gotti.wurmunlimited.modloader.interfaces.WurmServerMod;
 
 /**
  *
- * Makes forges, smelters, and kilns produce ash while burning with a 1 in 60 chance per second.
+ * Makes forges, smelters, and kilns produce ash while burning with a 1 in N chance per second.
  */
 public class AshProduce implements WurmServerMod, PreInitable, Configurable {
+    private int _AshChance = 60;
+    
     @Override
     public void preInit() {
         try {
@@ -38,7 +40,7 @@ public class AshProduce implements WurmServerMod, PreInitable, Configurable {
                     }*/ 
                     if (methodCall.getMethodName().equals("getTemplateId")) {
                         ctMethod.insertAt(methodCall.getLineNumber() + 1, 
-                        "{ if (new java.util.Random().nextInt(60) == 0) {" +
+                        "{ if (new java.util.Random().nextInt(" + String.valueOf(_AshChance) + ") == 0) {" +
                              "com.wurmonline.server.items.Item[] forgeItems = this.getItemsAsArray();"+
                              "boolean combinedAsh = false;"+
                              "for (int iForge = 0; iForge < forgeItems.length; iForge++) {"+
@@ -62,7 +64,9 @@ public class AshProduce implements WurmServerMod, PreInitable, Configurable {
     }
 
     @Override
-    public void configure(Properties prprts) {
+    public void configure(Properties properties) {
+        _AshChance = Math.max(1, Integer.valueOf(properties.getProperty("ashChance", String.valueOf(_AshChance))));
         
+        Logger.getLogger(AshProduce.class.getName()).log(Level.INFO, String.format("Forges, smelters, and kilns will now produce ash with a 1 in %d chance per second.", _AshChance));
     }
 }
