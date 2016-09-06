@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.wurmonline.ulviirala.mods;
 
 import java.util.logging.Level;
@@ -9,13 +14,15 @@ import javassist.CtPrimitiveType;
 import javassist.NotFoundException;
 import javassist.bytecode.Descriptor;
 import javassist.expr.ExprEditor;
+import javassist.expr.FieldAccess;
 import javassist.expr.MethodCall;
+import javassist.expr.NewExpr;
 import org.gotti.wurmunlimited.modloader.classhooks.HookManager;
 import org.gotti.wurmunlimited.modloader.interfaces.PreInitable;
 import org.gotti.wurmunlimited.modloader.interfaces.WurmServerMod;
 /**
  *
- * Removes the postage from sending items via mail, as well as the postage from returned/rejected mail.
+ * @author Iymayne
  */
 public class NoMailCost implements WurmServerMod, PreInitable {
     @Override
@@ -27,6 +34,31 @@ public class NoMailCost implements WurmServerMod, PreInitable {
             method.setBody("{ return 0; }");
             // could set "charge" to false in answer method instead, so server doesn't warn about charging 0 money, and mail was free.
             ctClass.toClass();
+            
+            // Places a 30 power courier enchantment on newly created mailboxes.
+            ctClass = HookManager.getInstance().getClassPool().get("com.wurmonline.server.items.ItemFactory");
+            parameters = new CtClass[] {
+                CtPrimitiveType.intType,
+                CtPrimitiveType.floatType,
+                CtPrimitiveType.byteType,
+                CtPrimitiveType.byteType,
+                CtPrimitiveType.longType,
+                HookManager.getInstance().getClassPool().get("java.lang.String")
+            };
+            CtMethod creationMethod = ctClass.getMethod("createItem", Descriptor.ofMethod(HookManager.getInstance().getClassPool().get("com.wurmonline.server.items.Item"), parameters));
+            creationMethod.instrument(new ExprEditor() { 
+                @Override
+                public void edit(NewExpr newExpr) throws CannotCompileException {
+                    if (newExpr.getClassName().equals("com.wurmonline.server.items.DbItem")) {
+                        creationMethod.insertAt(newExpr.getLineNumber() + 1, 
+                                "{ if (templateId >= 510 && templateId <= 513) {" +
+                                        "com.wurmonline.server.items.ItemSpellEffects effs;" +
+                                        "if ((effs = toReturn.getSpellEffects()) == null) effs = new com.wurmonline.server.items.ItemSpellEffects(toReturn.getWurmId());" +
+                                        "toReturn.getSpellEffects().addSpellEffect(new com.wurmonline.server.spells.SpellEffect(toReturn.getWurmId(), (byte)20, 30f, 20000000));" +
+                                "} }");
+                    }
+                }
+            });
             
             ctClass = HookManager.getInstance().getClassPool().get("com.wurmonline.server.questions.MailReceiveQuestion");
             parameters = new CtClass[] { HookManager.getInstance().getClassPool().get("java.util.Properties") };
@@ -48,8 +80,7 @@ public class NoMailCost implements WurmServerMod, PreInitable {
                 }
             });
             
-            // Not really necessary, but this method displays info about the cost in the UI,
-            // which is identical to the method above.
+            // Not really necessary, but this method displays info about the cost in the UI.
             parameters = new CtClass[] {
                 HookManager.getInstance().getClassPool().get("java.lang.String"),
                 HookManager.getInstance().getClassPool().get("com.wurmonline.server.items.Item"),
@@ -67,5 +98,6 @@ public class NoMailCost implements WurmServerMod, PreInitable {
         } catch (NotFoundException | CannotCompileException ex) {
             Logger.getLogger(NoMailCost.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
     }
 }
