@@ -1,10 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.wurmonline.ulviirala.mods;
 
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javassist.CannotCompileException;
@@ -14,19 +10,68 @@ import javassist.CtPrimitiveType;
 import javassist.NotFoundException;
 import javassist.bytecode.Descriptor;
 import javassist.expr.ExprEditor;
-import javassist.expr.FieldAccess;
 import javassist.expr.MethodCall;
 import javassist.expr.NewExpr;
 import org.gotti.wurmunlimited.modloader.classhooks.HookManager;
+import org.gotti.wurmunlimited.modloader.interfaces.Configurable;
 import org.gotti.wurmunlimited.modloader.interfaces.PreInitable;
 import org.gotti.wurmunlimited.modloader.interfaces.WurmServerMod;
 /**
  *
- * @author Iymayne
+ * Disables postage cost and places Courier enchants on newly created mailboxes.
  */
-public class NoMailCost implements WurmServerMod, PreInitable {
+public class NoMailCost implements WurmServerMod, PreInitable, Configurable {
+    private boolean _DisablePostage = true;
+    private boolean _EnableEnchant = true;
+    private float _EnchantPower = 30f;
+    
     @Override
     public void preInit() {
+        if (_DisablePostage)
+            DisablePostage();
+        
+        if (_EnableEnchant)
+            EnableEnchant();
+    }
+
+    /**
+     * Enables Courier enchants of newly created mailboxes.
+     */
+    private void EnableEnchant() {
+        try {
+            // Places a 30 power courier enchantment on newly created mailboxes.
+            CtClass ctClass = HookManager.getInstance().getClassPool().get("com.wurmonline.server.items.ItemFactory");
+            CtClass[] parameters = new CtClass[] {
+                CtPrimitiveType.intType,
+                CtPrimitiveType.floatType,
+                CtPrimitiveType.byteType,
+                CtPrimitiveType.byteType,
+                CtPrimitiveType.longType,
+                HookManager.getInstance().getClassPool().get("java.lang.String")
+            };
+            CtMethod ctMethod = ctClass.getMethod("createItem", Descriptor.ofMethod(HookManager.getInstance().getClassPool().get("com.wurmonline.server.items.Item"), parameters));
+            ctMethod.instrument(new ExprEditor() { 
+                @Override
+                public void edit(NewExpr newExpr) throws CannotCompileException {
+                    if (newExpr.getClassName().equals("com.wurmonline.server.items.DbItem")) {
+                        ctMethod.insertAt(newExpr.getLineNumber() + 1, 
+                                "{ if (templateId >= 510 && templateId <= 513) {" +
+                                        "com.wurmonline.server.items.ItemSpellEffects effs;" +
+                                        "if ((effs = toReturn.getSpellEffects()) == null) effs = new com.wurmonline.server.items.ItemSpellEffects(toReturn.getWurmId());" +
+                                        "toReturn.getSpellEffects().addSpellEffect(new com.wurmonline.server.spells.SpellEffect(toReturn.getWurmId(), (byte)20, " + _EnchantPower + "f, 20000000));" +
+                                        "} }");
+                    }
+                }
+            });
+        } catch (NotFoundException | CannotCompileException ex) {
+            Logger.getLogger(NoMailCost.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    /**
+     * Disables postage cost for sending mail and receiving returned mails.
+     */
+    private void DisablePostage() {
         try {
             CtClass ctClass = HookManager.getInstance().getClassPool().get("com.wurmonline.server.questions.MailSendConfirmQuestion");
             CtClass[] parameters = new CtClass[] { HookManager.getInstance().getClassPool().get("com.wurmonline.server.items.Item"), CtPrimitiveType.floatType };
@@ -35,30 +80,7 @@ public class NoMailCost implements WurmServerMod, PreInitable {
             // could set "charge" to false in answer method instead, so server doesn't warn about charging 0 money, and mail was free.
             ctClass.toClass();
             
-            // Places a 30 power courier enchantment on newly created mailboxes.
-            ctClass = HookManager.getInstance().getClassPool().get("com.wurmonline.server.items.ItemFactory");
-            parameters = new CtClass[] {
-                CtPrimitiveType.intType,
-                CtPrimitiveType.floatType,
-                CtPrimitiveType.byteType,
-                CtPrimitiveType.byteType,
-                CtPrimitiveType.longType,
-                HookManager.getInstance().getClassPool().get("java.lang.String")
-            };
-            CtMethod creationMethod = ctClass.getMethod("createItem", Descriptor.ofMethod(HookManager.getInstance().getClassPool().get("com.wurmonline.server.items.Item"), parameters));
-            creationMethod.instrument(new ExprEditor() { 
-                @Override
-                public void edit(NewExpr newExpr) throws CannotCompileException {
-                    if (newExpr.getClassName().equals("com.wurmonline.server.items.DbItem")) {
-                        creationMethod.insertAt(newExpr.getLineNumber() + 1, 
-                                "{ if (templateId >= 510 && templateId <= 513) {" +
-                                        "com.wurmonline.server.items.ItemSpellEffects effs;" +
-                                        "if ((effs = toReturn.getSpellEffects()) == null) effs = new com.wurmonline.server.items.ItemSpellEffects(toReturn.getWurmId());" +
-                                        "toReturn.getSpellEffects().addSpellEffect(new com.wurmonline.server.spells.SpellEffect(toReturn.getWurmId(), (byte)20, 30f, 20000000));" +
-                                "} }");
-                    }
-                }
-            });
+            
             
             ctClass = HookManager.getInstance().getClassPool().get("com.wurmonline.server.questions.MailReceiveQuestion");
             parameters = new CtClass[] { HookManager.getInstance().getClassPool().get("java.util.Properties") };
@@ -98,6 +120,19 @@ public class NoMailCost implements WurmServerMod, PreInitable {
         } catch (NotFoundException | CannotCompileException ex) {
             Logger.getLogger(NoMailCost.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    @Override
+    public void configure(Properties properties) {
+        _DisablePostage = Boolean.valueOf(properties.getProperty("disablePostage", String.valueOf(_DisablePostage)));
+        Logger.getLogger(NoMailCost.class.getName()).log(Level.INFO, String.format("Mod will%s disable mail postage cost.", (!_DisablePostage ? " not" : "")));
         
+        _EnableEnchant = Boolean.valueOf(properties.getProperty("enableEnchant", String.valueOf(_EnableEnchant)));
+        _EnchantPower = Float.valueOf(properties.getProperty("enchantPower", String.valueOf(_EnchantPower)));
+        
+        if (_EnchantPower < 1.0f || _EnchantPower > 101.0f)
+            _EnchantPower = 30.0f;
+        
+        Logger.getLogger(NoMailCost.class.getName()).log(Level.INFO, String.format("Newly created mailboxes will%s get %f power Courier enchants.", (!_EnableEnchant ? " not": ""), _EnchantPower));
     }
 }
