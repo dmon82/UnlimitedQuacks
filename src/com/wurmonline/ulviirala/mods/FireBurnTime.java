@@ -1,5 +1,6 @@
 package com.wurmonline.ulviirala.mods;
 
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javassist.CannotCompileException;
@@ -11,6 +12,7 @@ import javassist.bytecode.Descriptor;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import org.gotti.wurmunlimited.modloader.classhooks.HookManager;
+import org.gotti.wurmunlimited.modloader.interfaces.Configurable;
 import org.gotti.wurmunlimited.modloader.interfaces.PreInitable;
 import org.gotti.wurmunlimited.modloader.interfaces.WurmServerMod;
 
@@ -18,7 +20,9 @@ import org.gotti.wurmunlimited.modloader.interfaces.WurmServerMod;
  *
  * Displays an estimate of the remaining burn time of a fire before only a bed of coal remains.
  */
-public class FireBurnTime implements WurmServerMod, PreInitable {
+public class FireBurnTime implements WurmServerMod, PreInitable, Configurable {
+    public int _TargetTemperature = 5000;
+    
     @Override
     public void preInit() {
         try {
@@ -48,7 +52,7 @@ public class FireBurnTime implements WurmServerMod, PreInitable {
                             "    coolingSpeed *= Math.pow(0.8999999761581421, (double)target.getRarity());"+
 
                             "float decreaseTemperature = coolingSpeed * Math.max(1f, 11f - Math.max(1f, 20f * Math.max(30f, target.getCurrentQualityLevel()) / 200f));"+
-                            "int secondsRemaining = Math.round(Math.max(0, target.getTemperature() - 4000) / decreaseTemperature);"+
+                            "int secondsRemaining = Math.round(Math.max(0, target.getTemperature() - " + _TargetTemperature + ") / decreaseTemperature);"+
                             "String remaining = \"It will be pretty hot for about \" + secondsRemaining / 60 + \" minutes and \" + secondsRemaining % 60 + \" seconds.\";"+
 
                             "performer.getCommunicator().sendNormalServerMessage(remaining);"+
@@ -57,10 +61,14 @@ public class FireBurnTime implements WurmServerMod, PreInitable {
                     }
                 }
             });
-        } catch (CannotCompileException ex) {
-            Logger.getLogger(FireBurnTime.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NotFoundException ex) {
+        } catch (CannotCompileException | NotFoundException ex) {
             Logger.getLogger(FireBurnTime.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @Override
+    public void configure(Properties properties) {
+        _TargetTemperature = Math.max(4000, Math.min(9000, Integer.valueOf(properties.getProperty("targetTemperature", String.valueOf(_TargetTemperature)))));
+        Logger.getLogger(FireBurnTime.class.getName()).log(Level.INFO, String.format("Burn time estimation will be for %d temperature.", _TargetTemperature));
     }
 }
