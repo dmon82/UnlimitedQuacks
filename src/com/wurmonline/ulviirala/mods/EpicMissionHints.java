@@ -63,7 +63,6 @@ public class EpicMissionHints implements WurmServerMod, PreInitable {
                     }
                 }
             });
-            ctClass.toClass();
         } catch (NotFoundException | CannotCompileException ex) {
             Logger.getLogger(EpicMissionHints.class.getName()).log(Level.SEVERE, null, ex);
         }
