@@ -16,11 +16,12 @@ Development of the 1.4.1 update was kindly sponsored by http://pveplands.com/.
 * Can terraform, found settlements, and build structures near the white/black light altar.
 * Can found settlements when aggressive creatures or dens are nearby.
 
-# No mail cost 1.3.1
+# No mail cost 1.4.1
 * Removes postage from mailing items.
 * Removes postage from returned mails.
 * Newly created mailboxes will have a Courier enchant.
 * Configurable (can toggle any one feature, and specify enchant power).
+* Fixed default enchant not actually working. Well done, Ulvi, took you long enough.
 
 # PvP surface mining slope 1.3.1
 * Works like on PvE servers (3x mining skill, instead of 1x times).
