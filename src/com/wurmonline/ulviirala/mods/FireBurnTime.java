@@ -18,13 +18,30 @@ import org.gotti.wurmunlimited.modloader.interfaces.WurmServerMod;
 
 /**
  *
- * Displays an estimate of the remaining burn time of a fire before only a bed of coal remains.
+ * Displays an estimate of the remaining burn time of a fire before it drops
+ * down to a certain temperature.
  */
 public class FireBurnTime implements WurmServerMod, PreInitable, Configurable {
+    private static final Logger _Logger = Logger.getLogger(FireBurnTime.class.getName());
+    
+    /**
+     * Target temperature.
+     * 
+        # 0    -  999   The fire is not lit.
+        # 1000 - 1999	A few red glowing coals can be found under a bed of ahshes.
+        # 2000 - 3499	A layer of ashes is starting to form on the glowing coals.
+        # 3500 - 3999	A hot red glowing bed of coal remains of the fire now.
+        # 4000 - 4999	A few flames still dance on the fire but soon they too will die.
+        # 5000 - 6999	The fire is starting to fade.
+        # 7000 - 8999	The fire burns with wild flames and still has much unburnt material.
+        # 9000+			The fire burns steadily and will still burn for a long time.
+     */
     public int _TargetTemperature = 5000;
     
     @Override
     public void preInit() {
+        _Logger.info("Initialising FireBurnTime 1.4.1");
+        
         try {
             CtClass ctClass = HookManager.getInstance().getClassPool().get("com.wurmonline.server.behaviours.FireBehaviour");
             CtClass[] parameters = new CtClass[] {
@@ -53,22 +70,28 @@ public class FireBurnTime implements WurmServerMod, PreInitable, Configurable {
 
                             "float decreaseTemperature = coolingSpeed * Math.max(1f, 11f - Math.max(1f, 20f * Math.max(30f, target.getCurrentQualityLevel()) / 200f));"+
                             "int secondsRemaining = Math.round(Math.max(0, target.getTemperature() - " + _TargetTemperature + ") / decreaseTemperature);"+
-                            "String remaining = \"It will be pretty hot for about \" + secondsRemaining / 60 + \" minutes and \" + secondsRemaining % 60 + \" seconds.\";"+
-
-                            "performer.getCommunicator().sendNormalServerMessage(remaining);"+
+                                
+                            "if (" + _TargetTemperature + " > 8999) performer.getCommunicator().sendNormalServerMessage(\"It will burn steadily for about \" + secondsRemaining / 60 + \" minutes and \" + secondsRemaining % 60 + \" seconds.\");"+
+                            "else if (" + _TargetTemperature + " > 6999) performer.getCommunicator().sendNormalServerMessage(\"It will have much unburnt material for about \" + secondsRemaining / 60 + \" minutes and \" + secondsRemaining % 60 + \" seconds.\");"+
+                            "else if (" + _TargetTemperature + " > 4999) performer.getCommunicator().sendNormalServerMessage(\"It will not start to fade for about \" + secondsRemaining / 60 + \" minutes and \" + secondsRemaining % 60 + \" seconds.\");"+
+                            "else if (" + _TargetTemperature + " > 3999) performer.getCommunicator().sendNormalServerMessage(\"It will have a few dancing flames in about \" + secondsRemaining / 60 + \" minutes and \" + secondsRemaining % 60 + \" seconds.\");"+
+                            "else if (" + _TargetTemperature + " > 1999) performer.getCommunicator().sendNormalServerMessage(\"It will have a bed of red glowing coals in about \" + secondsRemaining / 60 + \" minutes and \" + secondsRemaining % 60 + \" seconds.\");"+
+                            "else if (" + _TargetTemperature + " > 999) performer.getCommunicator().sendNormalServerMessage(\"It will be a layer of ash in about \" + secondsRemaining / 60 + \" minutes and \" + secondsRemaining % 60 + \" seconds.\");"+
+                            "else performer.getCommunicator().sendNormalServerMessage(\"It will be completely cold in about \" + secondsRemaining / 60 + \" minutes and \" + secondsRemaining % 60 + \" seconds.\");"+
                         "}"
                         );
                     }
                 }
             });
         } catch (CannotCompileException | NotFoundException ex) {
-            Logger.getLogger(FireBurnTime.class.getName()).log(Level.SEVERE, null, ex);
+            _Logger.severe("FireBurnTime 1.4.1 could not be applied.");
+            _Logger.log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
     public void configure(Properties properties) {
-        _TargetTemperature = Math.max(4000, Math.min(9000, Integer.valueOf(properties.getProperty("targetTemperature", String.valueOf(_TargetTemperature)))));
-        Logger.getLogger(FireBurnTime.class.getName()).log(Level.INFO, String.format("Burn time estimation will be for %d temperature.", _TargetTemperature));
+        _TargetTemperature = Math.max(200, Math.min(9000, Integer.valueOf(properties.getProperty("targetTemperature", String.valueOf(_TargetTemperature)))));
+        _Logger.log(Level.INFO, String.format("Burn time estimation will be for %d temperature.", _TargetTemperature));
     }
 }
