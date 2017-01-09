@@ -1,0 +1,13 @@
+classname=com.wurmonline.ulviirala.mods.FireBurnTime
+classpath=FireBurnTime.jar
+# Temperature to estimate burn time for
+targetTemperature=5000
+
+# 0    -  999   The fire is not lit.
+# 1000 - 1999	A few red glowing coals can be found under a bed of ahshes.
+# 2000 - 3499	A layer of ashes is starting to form on the glowing coals.
+# 3500 - 3999	A hot red glowing bed of coal remains of the fire now.
+# 4000 - 4999	A few flames still dance on the fire but soon they too will die.
+# 5000 - 6999	The fire is starting to fade.
+# 7000 - 8999	The fire burns with wild flames and still has much unburnt material.
+# 9000+			The fire burns steadily and will still burn for a long time.
