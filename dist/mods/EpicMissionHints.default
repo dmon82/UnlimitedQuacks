@@ -1,0 +1,187 @@
+classname=com.wurmonline.ulviirala.mods.EpicMissionHints
+classpath=EpicMissionHints.jar
+
+# IMPORTANT NOTES
+#
+# Note that all invalid values will result in the noted default value
+# being used.
+#
+# Some missions determine the number of required players to do something,
+# by the amount of "active" players in the kingdom. Those are players that
+# have logged in within the last 7 real life days. Up do a fifth (1/5 or
+# 20 % of a kingdom's population), e.g. perform rituals.
+
+# Shows direction and distance to creatures with "traitor" in their name,
+# it works exactly like the Locate Soul spell of priests.
+# [default: true]
+useTraitorHints=true
+
+# Tile missions use a tree within the first 5 tiles of a settlement, or
+# between 3 - 10 tiles around a guard tower. Tree hints centers the tree
+# on the tile, and sets its damage to 69 to easier identify it. So you
+# don't have to cut down a whole settlement's perimeter if you're unlucky.
+# [default: true]
+useTreeHints=true
+
+# There are two sets of epic missions that generate, one set generates all
+# types of missions. The other generates if the server IS epic, IS a homeserver,
+# and the deity of the mission does NOT favour the server's kingdom (use guard
+# tower, drain token, kill creatures, or sacrifice creatures).
+#
+# By default, no deity favours the Freedom Isles, so those will never get
+# crafting or sacrifice (decent quality) items, and all other missions. If you
+# want all missions (any time can be disabled below), set this to true.
+# [default: false]
+useAllMissionTypes=false
+
+# Defines what mission types generate for homeservers that are NOT favoured
+# by a randomly chosen deity, that the mission is for.
+#
+# 0 = Perform ritual at a guard tower
+# 1 = Drain settlement token
+# 2 = Kill traitor or a number of creature type
+# 3 = Sacrifice creatures with sacrificial knife
+#
+# Values less than 0, and values greater than 3 are invalid.
+#
+# If you want a certain mission type to be more likely to be generated, you
+# can specify it multiple times (e.g. enemyServerMissions=0,0,0,1,2,2,2,2,2,3
+# or even enemyServerMissions=3,2,0,0,1,3,2,2,3,0,1).
+#
+# if you don't want a certain mission to generate, omit the number. At least
+# one mission type must be specified, or the default will be used.
+# [default: 0,1,2,3]
+enemyServerMissions=0,1,2,3
+
+# Defines what mission types generate for all other servers/kingdoms.
+#
+# Note: "Homeserver" in this context means, a server where only one kingdom
+#       is able to found settlements.
+#
+# 0 = Build an item (shrine, pylon, obelisk, temple, or spirit gate)
+# 1 = Perform a ritual with some item, or artifact on higher difficulty missions
+#     if they exist, at a monument (shring, pylone, et cetera), referenced in
+#     wurmzones.db -> EPICTARGETITEMS table.
+# 2 = Tile mission, cut down a tree within the first 5 tiles of a settlement's
+#     perimeter, or between 3 - 10 tiles around a guard tower.
+# 3 = Tile mission as well.
+# 4 = (NOT ON HOMESERVERS) Perform ritual at a guard tower.
+# 5 = (NOT ON HOMESERVERS) Drain settlement token.
+# 6 = Kill traitor or number of creature type.
+# 7 = ON HOMESERVERS: 1 to 3 chance of sacrifice "decent" item, 2 to 3 craft item
+#     On others: Sacrifice decent item.
+# 8 = Same as 7.
+# 9 = Give item to avatar.
+#10 = Same as 6.
+#
+# Same logic as enemyServerMissions.
+# [default: 0,1,2,3,4,5,6,7,8,9,10]
+otherServerMissions=0,1,2,3,4,5,6,7,8,9,10
+
+# Allow mission to perform a ritual at a guard tower.
+# [default: true]
+useGuardTowerMissions=true
+
+# Limit the required amount of players to perform this ritual
+# [default: -1] (No change)
+maxUseGuardTowerPerformers=-1
+
+# Allow mission that requires draining a settlement token.
+# [default: true]
+useSettlementMissions=true
+
+# Allow missions that require to kill a traitor, or a number of creatures.
+# [default: true]
+useCreatureKillMissions=true
+
+# If you want to use only traitor kill missions, instead of a number of
+# creatures, set this to true. Note though that server restarts might
+# cause creatures to lose their "traitor" name tag, and can't be located.
+#
+# Note that, if this option is true, it takes precedence over the option below.
+# [default: false]
+useOnlyTraitorMissions=false
+
+# If you want to only use kill missions that require to kill a number of
+# creatures, instead of locating a traitor, set this to true.
+#
+# Note that, if the former option is set to true, it takes precedence.
+# [default: false]
+neverUseTraitorMissions=false
+
+# If you want to set an upper limit to the required number of creatures to kill,
+# specify a number from 1 to 32767. If set to -1, no change is made.
+# [default: -1]
+creatureKillCountLimit=-1
+
+# Allow generation of sacrificing creatures with a sacrificial knife.
+# [default: true]
+useCreatureSacrificeMissions=true
+
+# If you want to set an upper limit to the required number of sacrifices,
+# specify a number from 1 to 32767 below. If set to -1, no change is made.
+# [default: -1]
+sacrificeCreatureCountLimit=-1
+
+# Allow generation of building a monument (shrine, pylon, obelisk, temple, spirit gate).
+# [default: true]
+useBuildTargetItemMissions=true
+
+# Allow missions that require to perform a ritual with an item or artifact.
+# [default: true]
+useTargetItemMissions=true
+
+# Limit the number of people required to perform the ritual, default depends
+# on the number of "active" people in the kingdom (see IMPORTANT NOTES). When
+# set to -1, no change is made.
+# [default: -1]
+targetItemMissionLimit=-1
+
+# Allow tile missions, cut down a tree within the first 5 tiles of a settlement's
+# perimeter, or between 3 - 10 tiles around a guard tower.
+# [default: true]
+useTileMissions=true
+
+# Allow item crafting/creating missions.
+# [default: true]
+useBuildMissions=true
+
+# Limit the number of items that need to be created. If set to -1, no change will
+# be made to the default behaviour.
+# [default: -1]
+buildCountLimit=-1
+
+# Limit the number of LARGE items. Those are items that have more than 100 components
+# to attach, like ships. If set to -1, no change will be made to the default behaviour.
+# [default: -1]
+buildLargeCountLimit=-1
+
+# Allow missions that require to sacrifice "decent" (QL30+) items, OR
+# the "hidden" items distributed randomly around the map.
+# [default: true]
+useSacrificeMissions=true
+
+# Limit the number of items needed to sacrifice. If set to -1, no change to the default
+# behaviour will be made.
+# [default: -1]
+sacrificeItemCountLimit=-1
+
+# In vanilla, if you need to create a food item, the amount is multiplied by 3. If you
+# want to change that, specify A NUMBER FROM 1 TO 5 as multiplier. No change will be made
+# if set to -1.
+# [default: -1]
+sacrificeFoodMultiplier=-1
+
+# Limit the number of "hidden" items on the map. In vanilla, the amound of hidden items
+# is (MAPSIZE / 500) * (difficulty * 2).
+# [default: -1]
+hiddenItemsCountLimit=-1
+
+# Allow give missions, requiring players to give an item to an avatar.
+# [default: true]
+useGiveMissions=true
+
+# Limit the number of players required to give the item to the avatar, this usually
+# depends on the number of "active" players (see IMPORTANT NOTES) in the kingdom.
+# [default: -1]
+giveCountLimit=-1
