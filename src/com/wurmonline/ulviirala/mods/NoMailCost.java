@@ -59,6 +59,7 @@ public class NoMailCost implements WurmServerMod, PreInitable, Configurable {
                                         "com.wurmonline.server.items.ItemSpellEffects effs;" +
                                         "if ((effs = toReturn.getSpellEffects()) == null) effs = new com.wurmonline.server.items.ItemSpellEffects(toReturn.getWurmId());" +
                                         "toReturn.getSpellEffects().addSpellEffect(new com.wurmonline.server.spells.SpellEffect(toReturn.getWurmId(), (byte)20, " + _EnchantPower + "f, 20000000));" +
+                                        "toReturn.permissions.setPermissionBit(com.wurmonline.server.players.Permissions.Allow.HAS_COURIER.getBit(), true);"+
                                         "} }");
                     }
                 }
@@ -78,7 +79,6 @@ public class NoMailCost implements WurmServerMod, PreInitable, Configurable {
             CtMethod method = ctClass.getMethod("getCostForItem", Descriptor.ofMethod(CtPrimitiveType.intType, parameters));
             method.setBody("{ return 0; }");
             // could set "charge" to false in answer method instead, so server doesn't warn about charging 0 money, and mail was free.
-            ctClass.toClass();
             
             
             
