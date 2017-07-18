@@ -32,9 +32,8 @@ public class PickMoreSprouts implements WurmServerMod, PreInitable, Configurable
                     if (methodCall.getMethodName().equals("insertItem")) {
                         ctMethod.insertAt(methodCall.getLineNumber() + 1, 
                                 "{ for (int iSprout = 0; iSprout <" + (_Count - 1) + "; iSprout++) {"+
-                                        "sprout = com.wurmonline.server.items.ItemFactory.createItem(266, Math.max(1.0f, (float)power), material, act.getRarity(), null);" +
+                                        "sprout = com.wurmonline.server.items.ItemFactory.createItem(266, Math.max(1.0f, (float)power * modifier + (float)sickle.getRarity()), material, act.getRarity(), null);" +
                                         "if (power < 0.0) { sprout.setDamage((float)(-power)/2.0f); }"+
-                                        "sprout.setData1(data1);"+
                                         "performer.getInventory().insertItem(sprout); }"+
                                 " }"
                         );
