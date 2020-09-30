@@ -24,18 +24,16 @@ public class PvpSurfaceMiningSlope implements WurmServerMod, PreInitable {
     public void preInit() {
         try {
             CtClass ctClass = HookManager.getInstance().getClassPool().get("com.wurmonline.server.behaviours.TileRockBehaviour");
+            
+            // public static boolean cannotMineSlope(Creature performer, Skill mining, int digTilex, int digTiley) {
             CtClass[] parameters = new CtClass[] {
-                HookManager.getInstance().getClassPool().get("com.wurmonline.server.behaviours.Action"),
                 HookManager.getInstance().getClassPool().get("com.wurmonline.server.creatures.Creature"),
-                HookManager.getInstance().getClassPool().get("com.wurmonline.server.items.Item"),
+                HookManager.getInstance().getClassPool().get("com.wurmonline.server.skills.Skill"),
                 CtPrimitiveType.intType,
-                CtPrimitiveType.intType,
-                CtPrimitiveType.booleanType,
-                CtPrimitiveType.intType,
-                CtPrimitiveType.intType,
-                CtPrimitiveType.shortType,
-                CtPrimitiveType.floatType };
-            CtMethod ctMethod = ctClass.getMethod("action", Descriptor.ofMethod(CtPrimitiveType.booleanType, parameters));
+                CtPrimitiveType.intType
+            };
+            
+            CtMethod ctMethod = ctClass.getDeclaredMethod("cannotMineSlope", parameters);
             ctMethod.instrument(new ExprEditor() { 
                 @Override
                 public void edit(FieldAccess fieldAccess) throws CannotCompileException {
