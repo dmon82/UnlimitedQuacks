@@ -33,14 +33,16 @@ public class PvpSurfaceMiningSlope implements WurmServerMod, PreInitable {
                 CtPrimitiveType.intType
             };
             
-            CtMethod ctMethod = ctClass.getDeclaredMethod("cannotMineSlope", parameters);
+            CtMethod ctMethod = ctClass.getDeclaredMethod("cannotMineSlope");
             ctMethod.instrument(new ExprEditor() { 
                 @Override
                 public void edit(FieldAccess fieldAccess) throws CannotCompileException {
                     String fieldName = fieldAccess.getFieldName();
                     
-                    if (fieldName.equals("com.wurmonline.server.Servers.localServer.PVPSERVER"))
+                    if (fieldName.equals("PVPSERVER")) {
                         fieldAccess.replace("$_ = false;");
+                        Logger.getLogger(PvpSurfaceMiningSlope.class.getName()).log(Level.INFO, "Patched PvP server statement for surface mining.");
+                    }
                 }
             });
     
